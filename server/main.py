@@ -26,8 +26,9 @@ app.add_middleware(
 )
 
 RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY", "").strip()
-RUNWAY_BASE_URL = "https://api.dev.runwayml.com/v1"
-RUNWAY_VERSION = "2024-11-06"
+RUNWAY_BASE_URL = os.getenv("RUNWAY_BASE_URL", "https://api.dev.runwayml.com/v1").strip().rstrip("/")
+RUNWAY_MODEL = os.getenv("RUNWAY_MODEL", "gen4.5").strip() or "gen4.5"
+RUNWAY_VERSION = os.getenv("RUNWAY_VERSION", "2024-11-06").strip() or "2024-11-06"
 MAX_IMAGE_BYTES = 3 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
@@ -119,7 +120,7 @@ async def generate_video(
     # Provider pricing and available model features vary. This server-side adapter
     # uses a documented image-to-video task and never exposes the API key to the browser.
     payload = {
-        "model": "gen4.5",
+        "model": RUNWAY_MODEL,
         "promptImage": data_uri,
         "promptText": combined_prompt,
         "ratio": RATIO_MAP[aspect_ratio],
