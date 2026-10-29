@@ -39,7 +39,7 @@ def test_generate_rejects_mismatched_image_signature():
 def test_generate_rejects_blank_prompt_before_provider_call():
     response = client.post(
         "/api/generate",
-        files={"image": ("photo.jpg", b"\\xff\\xd8\\xffsample", "image/jpeg")},
+        files={"image": ("photo.jpg", b"\xff\xd8\xffsample", "image/jpeg")},
         data={"prompt": "   "},
     )
 
@@ -48,7 +48,7 @@ def test_generate_rejects_blank_prompt_before_provider_call():
 
 
 def test_generate_rejects_oversized_image():
-    oversized_jpeg = b"\\xff\\xd8\\xff" + (b"x" * (3 * 1024 * 1024))
+    oversized_jpeg = b"\xff\xd8\xff" + (b"x" * (3 * 1024 * 1024))
 
     response = client.post(
         "/api/generate",
