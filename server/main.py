@@ -28,7 +28,7 @@ app.add_middleware(
 RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY", "").strip()
 RUNWAY_BASE_URL = "https://api.dev.runwayml.com/v1"
 RUNWAY_VERSION = "2024-11-06"
-MAX_IMAGE_BYTES = 10 * 1024 * 1024
+MAX_IMAGE_BYTES = 3 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 TEMPLATE_DIRECTIONS = {
@@ -79,7 +79,19 @@ async def generate_video(
     if not image_bytes:
         raise HTTPException(status_code=400, detail="The uploaded image is empty.")
     if len(image_bytes) > MAX_IMAGE_BYTES:
-        raise HTTPException(status_code=413, detail="Image must be 10 MB or smaller.")
+        raise HTTPException(status_code=413, detail="Image must be 3 MB or smaller.")
+
+    # Validate file signatures; Content-Type alone can be spoofed by clients.
+    is_jpeg = image_bytes.startswith(b"\xff\xd8\xff")
+    is_png = image_bytes.startswith(b"\x89PNG\r\n\x1a\n")
+    is_webp = len(image_bytes) >= 12 and image_bytes[:4] == b"RIFF" and image_bytes[8:12] == b"WEBP"
+    valid_signature = {
+        "image/jpeg": is_jpeg,
+        "image/png": is_png,
+        "image/webp": is_webp,
+    }.get(image.content_type, False)
+    if not valid_signature:
+        raise HTTPException(status_code=415, detail="The file contents do not match a supported JPG, PNG, or WebP image.")
     if not prompt.strip():
         raise HTTPException(status_code=400, detail="A video prompt is required.")
     if len(prompt) > 1200:
