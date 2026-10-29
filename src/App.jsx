@@ -5,6 +5,8 @@ import {
   Upload, WandSparkles, X, Zap
 } from 'lucide-react';
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
 const templates = [
   { id: 'cinematic', name: 'Cinematic', note: 'Film-like camera movement', icon: Film },
   { id: 'ugc', name: 'Human story', note: 'Natural, candid moments', icon: AudioLines },
@@ -70,7 +72,7 @@ export default function App() {
     form.append('duration', duration);
     form.append('quality', quality);
     try {
-      const response = await fetch('/api/generate', { method: 'POST', body: form });
+      const response = await fetch(`${API_BASE_URL}/api/generate`, { method: 'POST', body: form });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.detail || data.error || 'Video generation is not configured yet. Add a provider API key to the server environment.');
       if (data.video_url) {
@@ -81,7 +83,7 @@ export default function App() {
         let completed = false;
         for (let i = 0; i < 90; i++) {
           await new Promise(resolve => setTimeout(resolve, 4000));
-          const poll = await fetch('/api/generate/' + encodeURIComponent(data.task_id));
+          const poll = await fetch(`${API_BASE_URL}/api/generate/${encodeURIComponent(data.task_id)}`);
           const task = await poll.json().catch(() => ({}));
           if (!poll.ok) throw new Error(task.detail || 'Could not check generation status.');
           if (task.status === 'SUCCEEDED' || task.status === 'COMPLETED') {
