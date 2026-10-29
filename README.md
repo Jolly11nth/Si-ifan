@@ -25,6 +25,10 @@ Requirements: Node.js 20+ and Python 3.10+.
 
 Without a configured provider key, the UI will load, but generation requests return a clear configuration error rather than faking a result.
 
+## Automated tests
+
+Install the development dependencies with `pip install -r requirements-dev.txt`, then run `pytest -q` from the repository root. The suite checks API health, upload MIME/signature validation, oversized uploads, blank prompts, and invalid task IDs. CI runs these tests alongside the frontend build and backend import checks.
+
 ## Generation integration
 
 The backend calls Runway's official image-to-video task endpoint, combines the user's prompt with scene and template direction, and polls task status through a same-origin frontend API:
