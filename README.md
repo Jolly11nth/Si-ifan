@@ -4,7 +4,7 @@ Si'ifan Studio is a responsive image-to-video creator. Users upload a reference 
 
 ## Features
 
-- Drag-and-drop or browse to upload an image, with preview and file-size/type checks
+- Drag-and-drop or browse to upload a JPG, PNG, or WebP image up to 3 MB, with preview and file-content/type checks
 - Four visual directions: Cinematic, Human Story, Product Ad, and Travel Diary
 - Scene/location field and detailed motion prompt
 - Aspect ratio and duration controls
@@ -38,7 +38,7 @@ The API key must remain server-side. The current adapter uses Runway model `gen4
 ## Before production
 
 - Add authentication, per-user quotas, rate limiting, and cost/usage metering.
-- Validate file signatures in addition to MIME types and keep upload limits strict.
+- Keep file-signature validation and strict upload limits enabled.
 - Store generated outputs in private object storage with signed URLs and retention/deletion controls if long-term history is added.
 - Add durable job records and a queue for long-running generations instead of relying only on browser polling.
 - Add automated tests, monitoring, and graceful retry/cancellation behavior.
