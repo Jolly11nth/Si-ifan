@@ -90,7 +90,7 @@ export default function App() {
             completed = true;
             break;
           }
-          if (task.status === 'FAILED' || task.status === 'CANCELLED') {
+          if (task.status === 'FAILED' || ['CANCELED', 'CANCELLED'].includes(task.status)) {
             throw new Error(task.error || 'The video provider could not complete this generation. Try a different prompt.');
           }
           setStatus('Rendering your video… ' + Math.min(99, Math.round(((i + 1) / 90) * 100)) + '%');
