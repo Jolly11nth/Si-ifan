@@ -35,12 +35,12 @@ export default function App() {
 
   function handleImage(file) {
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Please choose an image file (PNG, JPG, or WebP).');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Image must be 10 MB or smaller.');
+    if (file.size > 3 * 1024 * 1024) {
+      setError('Image must be 3 MB or smaller.');
       return;
     }
     setError('');
@@ -166,7 +166,7 @@ export default function App() {
                   <button className="upload-zone" onClick={() => fileRef.current?.click()} onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); handleImage(e.dataTransfer.files?.[0]); }}>
                     <span className="upload-icon"><ImagePlus size={23} /></span>
                     <strong>Drop your image here, or <span>browse</span></strong>
-                    <small>PNG, JPG or WebP · Up to 10 MB</small>
+                    <small>PNG, JPG or WebP · Up to 3 MB</small>
                     <span className="upload-button"><Upload size={15} /> Upload image</span>
                   </button>
                 )}
