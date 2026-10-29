@@ -18,7 +18,7 @@ Requirements: Node.js 20+ and Python 3.10+.
 
 1. Install frontend dependencies: `npm install`
 2. Create a Python virtual environment and install the backend dependencies: `pip install -r requirements.txt`
-3. Copy `.env.example` to `.env` and add your Runway API key as `RUNWAY_API_KEY`.
+3. Copy `.env.example` to `.env` and add your Runway developer API key as `RUNWAY_API_KEY`. Keep this secret on the backend only.
 4. Start the API from the repository root: `uvicorn server.main:app --reload --port 8000`
 5. In a second terminal, start the frontend: `npm run dev`
 6. Open the local Vite URL printed in your terminal. Vite proxies `/api` to `http://127.0.0.1:8000` during local development.
@@ -27,7 +27,7 @@ Without a configured provider key, the UI will load, but generation requests ret
 
 ## Automated tests
 
-Install the development dependencies with `pip install -r requirements-dev.txt`, then run `pytest -q` from the repository root. The suite checks API health, upload MIME/signature validation, oversized uploads, blank prompts, and invalid task IDs. CI runs these tests alongside the frontend build and backend import checks.
+Install the development dependencies with `pip install -r requirements-dev.txt`, then run `PYTHONPATH=. python -m pytest -q` from the repository root. The suite checks API health, upload MIME/signature validation, oversized uploads, blank prompts, invalid task IDs, missing provider configuration, provider request payloads, rate-limit errors, and successful task-status normalization. Provider calls are mocked in CI, so tests do not consume credits or require a real API key. CI runs these tests alongside the frontend build and backend import checks.
 
 ## Generation integration
 
@@ -39,7 +39,7 @@ The backend calls Runway's official image-to-video task endpoint, combines the u
 
 For separate frontend/backend deployments, set the frontend build variable `VITE_API_BASE_URL` to the backend origin (for example, `https://your-api.example.com`) and set the backend variable `ALLOWED_ORIGINS` to the exact frontend origin. If both are served on one origin with `/api` routed to FastAPI, leave `VITE_API_BASE_URL` blank.
 
-The API key must remain server-side. The current adapter uses Runway model `gen4.5`; provider model availability, supported durations, output ratios, and pricing can change. Check the official [Runway API reference](https://docs.dev.runwayml.com/api/) before production deployment.
+The API key must remain server-side. The adapter defaults to Runway model `gen4.5` and supports backend environment overrides for `RUNWAY_BASE_URL`, `RUNWAY_MODEL`, and `RUNWAY_VERSION`. `RUNWAY_BASE_URL` should normally remain `https://api.dev.runwayml.com/v1`; change it only if Runway documents a replacement endpoint for your account. Provider model availability, supported durations, output ratios, credits, and pricing can change. Review the official [Runway API getting-started guide](https://docs.dev.runwayml.com/guides/using-the-api/) and [image-to-video endpoint](https://dev.runwayml.com/endpoints/image_to_video) before production deployment. Mocked tests verify the integration contract, but a live generation still requires a valid API key and an actual provider smoke test.
 
 ## Before production
 
