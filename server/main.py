@@ -28,7 +28,7 @@ app.add_middleware(
 RUNWAY_API_KEY = os.getenv("RUNWAY_API_KEY", "").strip()
 RUNWAY_BASE_URL = "https://api.dev.runwayml.com/v1"
 RUNWAY_VERSION = "2024-11-06"
-MAX_IMAGE_BYTES = 3 * 1024 * 1024
+MAX_IMAGE_BYTES = 10 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 
 TEMPLATE_DIRECTIONS = {
@@ -79,15 +79,15 @@ async def generate_video(
     if not image_bytes:
         raise HTTPException(status_code=400, detail="The uploaded image is empty.")
     if len(image_bytes) > MAX_IMAGE_BYTES:
-        raise HTTPException(status_code=413, detail="Image must be 5 MB or smaller for this generation provider.")
+        raise HTTPException(status_code=413, detail="Image must be 10 MB or smaller.")
     if not prompt.strip():
         raise HTTPException(status_code=400, detail="A video prompt is required.")
-    if len(prompt) > 900:
-        raise HTTPException(status_code=400, detail="Keep the prompt under 900 characters.")
+    if len(prompt) > 1200:
+        raise HTTPException(status_code=400, detail="Keep the prompt under 1200 characters.")
     if aspect_ratio not in RATIO_MAP:
         raise HTTPException(status_code=400, detail="Unsupported aspect ratio.")
     if duration not in (5, 10):
-        raise HTTPException(status_code=400, detail="Choose a duration of 5, 8, or 10 seconds.")
+        raise HTTPException(status_code=400, detail="Choose a duration of 5 or 10 seconds.")
     if template not in TEMPLATE_DIRECTIONS:
         raise HTTPException(status_code=400, detail="Choose one of the available visual templates.")
 
