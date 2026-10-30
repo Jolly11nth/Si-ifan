@@ -142,12 +142,39 @@ async def generate_video(
         raise HTTPException(status_code=502, detail="Could not reach the video provider. Please try again shortly.")
 
     if response.status_code >= 400:
+        # Preserve Runway's structured validation details so the client can show
+        # which field failed (for example, promptImage, ratio, or duration).
         try:
             provider_error = response.json()
-            message = provider_error.get("error") or provider_error.get("message") or "Video provider rejected the request."
+            if isinstance(provider_error, dict):
+                error_name = provider_error.get("error")
+                issues = provider_error.get("issues")
+                message = provider_error.get("message")
+                if issues:
+                    detail = {
+                        "error": error_name or "Video provider rejected the request.",
+                        "issues": issues,
+                    }
+                    if message:
+                        detail["message"] = message
+                else:
+                    detail = message or error_name or provider_error
+            else:
+                detail = provider_error
         except ValueError:
-            message = "Video provider rejected the request."
-        raise HTTPException(status_code=response.status_code if response.status_code < 500 else 502, detail=str(message)[:300])
+            detail = response.text[:1000] or "Video provider rejected the request."
+
+        # Keep the useful field-level error without returning headers, secrets,
+        # or the submitted image payload to the browser.
+        if isinstance(detail, (dict, list)):
+            import json
+            detail_text = json.dumps(detail, ensure_ascii=False)
+        else:
+            detail_text = str(detail)
+        raise HTTPException(
+            status_code=response.status_code if response.status_code < 500 else 502,
+            detail=detail_text[:2000],
+        )
 
     try:
         task = response.json()
