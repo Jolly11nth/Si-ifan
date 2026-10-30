@@ -1,5 +1,6 @@
 import base64
 import os
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 load_dotenv()
 
@@ -195,3 +197,11 @@ async def get_generation(task_id: str):
         "video_url": video_url,
         "error": error_message,
     })
+
+
+# In production, the Docker image includes the Vite build in /app/dist.
+# Mount this after API routes so /api endpoints keep precedence, while / and
+# client-side routes serve the React single-page application.
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "dist"
+if (FRONTEND_DIST / "index.html").is_file():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="frontend")
