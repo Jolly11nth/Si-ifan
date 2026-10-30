@@ -46,6 +46,7 @@ export default function App() {
       return;
     }
     setError('');
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImage(file);
     setImageUrl(URL.createObjectURL(file));
   }
@@ -129,9 +130,9 @@ export default function App() {
         <div className="sidebar-bottom">
           <div className="credits-card">
             <div className="credits-top"><span className="credit-icon"><Zap size={15} /></span><span>Generation credits</span></div>
-            <div className="credits-value">Demo mode <span>· API required</span></div>
+            <div className="credits-value">Ready to create <span>· provider setup needed</span></div>
             <div className="credits-track"><span /></div>
-            <p>Connect a video provider to render and save your creations.</p>
+            <p>Video rendering uses a Runway API key and available provider credits. Your key stays on the server.</p>
           </div>
           <div className="profile-row">
             <div className="profile-avatar">S</div><div className="profile-copy"><strong>Studio creator</strong><span>Free workspace</span></div><ChevronDown size={15} />
@@ -162,7 +163,7 @@ export default function App() {
                 {imageUrl ? (
                   <div className="uploaded-preview">
                     <img src={imageUrl} alt="Uploaded reference" />
-                    <div className="uploaded-overlay"><span><Check size={14} /> Image added</span><button onClick={() => { setImage(null); setImageUrl(''); }} aria-label="Remove image"><X size={16} /></button></div>
+                    <div className="uploaded-overlay"><span><Check size={14} /> Image added</span><button onClick={() => { setImage(null); if (imageUrl) URL.revokeObjectURL(imageUrl); setImageUrl(''); }} aria-label="Remove image"><X size={16} /></button></div>
                   </div>
                 ) : (
                   <button className="upload-zone" onClick={() => fileRef.current?.click()} onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); handleImage(e.dataTransfer.files?.[0]); }}>
@@ -180,7 +181,7 @@ export default function App() {
                 <div className="template-grid">
                   {templates.map(item => {
                     const Icon = item.icon;
-                    return <button key={item.id} className={'template-option ' + (template === item.id ? 'selected' : '')} onClick={() => setTemplate(item.id)}>
+                    return <button type="button" key={item.id} aria-pressed={template === item.id} className={'template-option ' + (template === item.id ? 'selected' : '')} onClick={() => setTemplate(item.id)}>
                       <span className={'template-art art-' + item.id}><Icon size={20} /></span>
                       <span className="template-text"><strong>{item.name}</strong><small>{item.note}</small></span>
                       <span className="radio-mark">{template === item.id && <span />}</span>
@@ -202,7 +203,7 @@ export default function App() {
               <div className="section-card settings-card">
                 <div className="card-heading"><div className="step-number">04</div><div><h2>Output settings</h2><p>Fine-tune the format for your platform.</p></div></div>
                 <div className="settings-grid">
-                  <div><label className="field-label">Aspect ratio</label><div className="segmented-control"><button className={aspect === '9:16' ? 'chosen' : ''} onClick={() => setAspect('9:16')}><span className="ratio-portrait" /> 9:16</button><button className={aspect === '16:9' ? 'chosen' : ''} onClick={() => setAspect('16:9')}><span className="ratio-landscape" /> 16:9</button><button className={aspect === '1:1' ? 'chosen' : ''} onClick={() => setAspect('1:1')}><span className="ratio-square" /> 1:1</button></div></div>
+                  <div><label className="field-label">Aspect ratio</label><div className="segmented-control"><button type="button" aria-pressed={aspect === '9:16'} className={aspect === '9:16' ? 'chosen' : ''} onClick={() => setAspect('9:16')}><span className="ratio-portrait" /> 9:16</button><button type="button" aria-pressed={aspect === '16:9'} className={aspect === '16:9' ? 'chosen' : ''} onClick={() => setAspect('16:9')}><span className="ratio-landscape" /> 16:9</button><button type="button" aria-pressed={aspect === '1:1'} className={aspect === '1:1' ? 'chosen' : ''} onClick={() => setAspect('1:1')}><span className="ratio-square" /> 1:1</button></div></div>
                   <div><label className="field-label" htmlFor="duration">Duration</label><div className="select-wrap"><Clock3 size={16} /><select id="duration" value={duration} onChange={e => setDuration(e.target.value)}><option value="5">5 seconds</option><option value="10">10 seconds</option></select><ChevronDown size={15} /></div></div>
                   <div className="quality-field"><label className="field-label" htmlFor="quality">Resolution</label><div className="select-wrap"><Film size={16} /><select id="quality" value={quality} onChange={e => setQuality(e.target.value)}><option value="720p">720p · HD</option></select><ChevronDown size={15} /></div></div>
                 </div>
@@ -214,7 +215,7 @@ export default function App() {
                 {busy ? 'Creating your video…' : 'Generate video'}
                 {!busy && <ArrowRight size={18} />}
               </button>
-              <p className="generation-note">AI generations may take a few minutes. Only upload media you have permission to use.</p>
+              <p className="generation-note">Rendering requires an active Runway API key and provider credits. Jobs can take a few minutes. Only upload media you have permission to use.</p>
             </section>
 
             <aside className="preview-column">
