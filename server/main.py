@@ -142,12 +142,32 @@ async def generate_video(
         raise HTTPException(status_code=502, detail="Could not reach the video provider. Please try again shortly.")
 
     if response.status_code >= 400:
+        # Preserve Runway's structured validation details so the UI/logs can
+        # identify the exact field that failed instead of showing a generic error.
         try:
             provider_error = response.json()
-            message = provider_error.get("error") or provider_error.get("message") or "Video provider rejected the request."
         except ValueError:
-            message = "Video provider rejected the request."
-        raise HTTPException(status_code=response.status_code if response.status_code < 500 else 502, detail=str(message)[:300])
+            provider_error = {}
+
+        if isinstance(provider_error, dict):
+            message = (
+                provider_error.get("error")
+                or provider_error.get("message")
+                or provider_error.get("detail")
+                or "Video provider rejected the request."
+            )
+            details = {}
+            for key in ("issues", "errors", "details", "field", "code"):
+                if key in provider_error:
+                    details[key] = provider_error[key]
+            if details:
+                message = {"message": str(message)[:300], **details}
+        else:
+            message = str(provider_error)[:500] or "Video provider rejected the request."
+
+        # Keep client errors as client errors; map upstream server errors to 502.
+        status_code = response.status_code if response.status_code < 500 else 502
+        raise HTTPException(status_code=status_code, detail=message)
 
     try:
         task = response.json()
